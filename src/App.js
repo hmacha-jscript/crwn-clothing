@@ -5,7 +5,10 @@ import { Route, Switch } from "react-router-dom";
 import Shop from "./components/Shop/Shop";
 import Header from "./components/Header/Header";
 import SignInAndSignUp from "./components/SignIn-and-SignUp/SignInAndSignUp";
-import { auth } from "./components/firebase/firebase.utils";
+import {
+	auth,
+	createUserProfileDocument,
+} from "./components/firebase/firebase.utils";
 
 class App extends Component {
 	constructor() {
@@ -17,8 +20,21 @@ class App extends Component {
 
 	unsubscribeFromAuth = "";
 	componentDidMount() {
-		this.unsubscribeFromAuth = auth.onAuthStateChanged((user) => {
-			this.setState({ currentUser: user });
+		this.unsubscribeFromAuth = auth.onAuthStateChanged(async (userAuth) => {
+			if (userAuth) {
+				const userRef = await createUserProfileDocument(userAuth);
+				//check whether user is persisted in db.
+				userRef.onSnapshot((snapshot) => {
+					this.setState({
+						currentUser: {
+							id: snapshot.id,
+							...snapshot.data(),
+						},
+					});
+				});
+			} else {
+				this.setState({ currentUser: userAuth });
+			}
 		});
 	}
 
@@ -27,6 +43,7 @@ class App extends Component {
 	}
 
 	render() {
+		console.log(this.state.currentUser);
 		return (
 			<div className="App">
 				<Header currentUser={this.state.currentUser} />
