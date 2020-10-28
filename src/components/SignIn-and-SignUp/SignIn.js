@@ -22,6 +22,8 @@ export default class SignIn extends Component {
 			this.setState((state) => {
 				return { email: "", password: "" };
 			});
+			//redirecting to home page
+			// this.props.history.push("/");
 		} catch (error) {
 			console.error(error);
 		}
